@@ -1,6 +1,6 @@
 import os
-os.environ['KAGGLE_USERNAME'] = 'asit111' 
-os.environ['KAGGLE_KEY'] = '9b8b0b2238108048307e7fb9a882db93' 
+os.environ['KAGGLE_USERNAME'] = 'asitm77' 
+os.environ['KAGGLE_KEY'] = '3cfe9b1053b958b8b2a933b96d992f93' 
 
 import kaggle
 import time
