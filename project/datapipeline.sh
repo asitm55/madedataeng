@@ -1,3 +1,5 @@
 #!/bin/bash
 pip3 install kaggle
-python3 /project/datapipeline.py
+pip install pandas pysqlite3 
+python3 ./project/datapipeline.py
+
