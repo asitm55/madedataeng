@@ -1,26 +1,41 @@
 import os
-os.environ['KAGGLE_USERNAME'] = 'asitm77' 
-os.environ['KAGGLE_KEY'] = '3cfe9b1053b958b8b2a933b96d992f93' 
+import requests
+import pandas as pd
+import sqlite3
 
-import kaggle
-import time
+# Define the URL of the dataset
+dataset_url = 'https://www.kaggle.com/datasets/shrutibhargava94/india-air-quality-data'
 
-dataset_links = ["https://www.kaggle.com/datasets/shrutibhargava94/india-air-quality-data",
-                 "https://www.kaggle.com/datasets/rohanrao/air-quality-data-in-india",
-                 "https://www.kaggle.com/datasets/abhisheksjha/time-series-air-quality-data-of-india-2010-2023",
-                 "https://www.kaggle.com/datasets/fedesoriano/air-quality-data-in-india",
-                 "https://www.kaggle.com/datasets/neomatrix369/air-quality-data-in-india-extended"]
+# Define the data directory
+data_dir = '/data'
+os.makedirs(data_dir, exist_ok=True)
 
-for dataset in dataset_links:
-    folder_name = f"../data/{'-'.join(dataset.split('/')[-2:])}"
-    dataset = '/'.join(dataset.split('/')[-2:])
+# Fetch the dataset
+response = requests.get(dataset_url)
+dataset_path = os.path.join(data_dir, 'data.csv')
 
-    print(f'Creating folder at {folder_name}')
-    os.mkdir(folder_name)
+with open(dataset_path, 'wb') as file:
+    file.write(response.content)
 
-    print(f'Downloading the {dataset} dataset')
+# Load the dataset into a DataFrame with error handling
+try:
+    df = pd.read_csv(dataset_path, on_bad_lines='skip')  # Skips bad lines
+except pd.errors.ParserError as e:
+    print(f"ParserError: {e}")
+    # Additional handling if needed
 
-    kaggle.api.dataset_download_files(dataset, path=folder_name, unzip=True)
-    time.sleep(1)
+# Data transformation and error fixing
+# Example: Fill missing values and drop duplicates
+df.fillna(method='ffill', inplace=True)
+df.drop_duplicates(inplace=True)
 
-print('Done')
+# Define SQLite database path
+db_path = os.path.join(data_dir, 'dataset.db')
+
+# Save the DataFrame to SQLite
+conn = sqlite3.connect(db_path)
+df.to_sql('data', conn, if_exists='replace', index=False)
+conn.close()
+
+print(f"Data pipeline completed. Data is stored in {db_path}")
+
